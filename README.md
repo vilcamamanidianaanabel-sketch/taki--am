@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Taki Ñam — Aprende lenguas del Perú</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Poppins,system-ui;background:#000;color:#fff}
+section{display:none;min-height:100vh;padding:90px 20px}
+section.active{display:block}
+header{position:fixed;top:0;left:0;width:100%;display:flex;align-items:center;gap:10px;padding:12px 18px;background:rgba(0,0,0,.55);z-index:100}
+header img{width:42px;height:42px;border-radius:8px}
+.btn{background:#ff6b00;color:#fff;border:none;padding:12px 18px;border-radius:10px;font-weight:700;cursor:pointer}
+.btn.ghost{background:#333;color:#fff;border:1px solid #fff;padding:10px}
+.quiz-btn{display:block;width:100%;margin-top:6px;background:#f0f0f0;color:#000;border:none;padding:10px;border-radius:8px;cursor:pointer;}
+.correct{background:#16a34a!important;color:#fff}
+.wrong{background:#dc2626!important;color:#fff}
+
+/* BIENVENIDA */
+#welcome{background:url('https://images.pexels.com/photos/18630335/pexels-photo-18630335.jpeg') center/cover}
+.welcome-box{max-width:820px;margin:auto;background:rgba(0,0,0,.65);padding:48px;border-radius:18px;text-align:center}
+
+/* ENCUESTA */
+#survey{background:url('https://cdn.pixabay.com/photo/2020/10/23/16/43/vicuna-5679264_1280.jpg') center/cover}
+.survey-box{max-width:520px;margin:auto;background:rgba(0,0,0,.75);padding:32px;border-radius:18px}
+.progress{height:8px;background:#333;border-radius:10px;overflow:hidden;margin-bottom:16px}
+.progress span{display:block;height:100%;background:#ff6b00;width:0%}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
+.card{background:#fff;color:#000;padding:14px;border-radius:12px;cursor:pointer;text-align:center;font-weight:600}
+.card.selected{outline:3px solid #ff6b00}
+
+/* APP */
+#app{background:url('https://customholidaysonline.com/wp-content/uploads/2020/07/Machu-Picchu-Picture.jpg') center/cover}
+.app{display:flex;gap:16px}
+.sidebar{width:240px;background:rgba(0,0,0,.8);padding:16px;border-radius:16px}
+.nav{padding:12px;border-radius:10px;cursor:pointer;margin-bottom:6px}
+.nav.active{background:#ff6b00}
+.content{flex:1;background:rgba(255,255,255,.96);border-radius:16px;padding:16px;color:#000}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.cardY{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.15);cursor:pointer}
+.cardY img{width:100%;height:140px;object-fit:cover}
+.cardY div{padding:10px;font-weight:600}
+.viewer{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200}
+.viewerBox{background:#fff;width:92%;max-width:900px;border-radius:18px;padding:18px;max-height:90vh;overflow:auto;color:#000;position:relative;}
+.viewerBox textarea,input{width:100%;padding:10px;margin-top:8px}
+.viewerBox button.closeX{position:absolute;top:10px;right:10px;background:#dc2626;color:#fff;font-weight:700;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;}
+.comment-box{margin-top:10px;background:#f0f0f0;padding:8px;border-radius:8px;color:#000;max-height:150px;overflow:auto}
+</style>
+</head>
+<body>
+<header>
+<img src="https://img.freepik.com/premium-vector/llama-head-animal-wild-life-logo-vector-illustration_589352-697.jpg"><h2>Taki Ñam</h2>
+</header>
+
+<section id="welcome" class="active">
+  <div class="welcome-box" style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+    <!-- Columna izquierda: texto y botón -->
+    <div style="flex:1; min-width:250px; text-align:left;">
+      <h1>LAS LENGUAS NO MUEREN SI ALGUIEN LAS ESCUCHA </h1>
+      <p>Explora, aprende y protege las lenguas originarias del Perú, creativamente y con innovación.</p>
+      <button class="btn" onclick="show('survey')">Empezar</button>
+    </div>
+    <!-- Columna derecha: imagen -->
+    <div style="flex:1; min-width:250px; text-align:center;">
+      <img src="https://www.programapd.pe/wp-content/uploads/2022/02/Identidad-cultural-y-como-fomentarla-1.jpg" 
+           alt="Lenguas del Perú" 
+           style="max-width:100%;border-radius:12px;">
+    </div>
+  </div>
+</section>
+
+<section id="survey">
+<div class="survey-box">
+<div class="progress"><span id="bar"></span></div>
+<h2 id="surveyQ"></h2>
+<div class="cards" id="surveyOpts"></div>
+<div style="margin-top:20px;display:flex;gap:10px;justify-content:space-between">
+<button class="btn ghost" onclick="prevQ()">Atrás</button>
+<button class="btn ghost" onclick="skipSurvey()">Saltar</button>
+<button class="btn" onclick="nextQ()">Siguiente</button>
+</div>
+</div>
+</section>
+
+<section id="app">
+<div class="app">
+<aside class="sidebar">
+<div class="nav active" onclick="load('lecciones')">Lecciones</div>
+<div class="nav" onclick="load('videos')">Videos</div>
+<div class="nav" onclick="load('profesores')">Profesores</div>
+<div class="nav" onclick="load('quiz')">Quiz</div>
+<div class="nav" onclick="load('perfil')">Perfil</div>
+</aside>
+<main class="content" id="appContent"></main>
+</div>
+</section>
+
+<script>
+
+const sections=document.querySelectorAll('section');
+function show(id){sections.forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+
+// --- ENCUESTA ---
+const survey=[
+{q:'¿Qué lengua quieres aprender?',o:['Quechua','Aymara','Shipibo-Konibo','Asháninka','Awajún']},
+{q:'¿Cuál es tu nivel actual?',o:['Inicial','Intermedio','Avanzado']},
+{q:'¿Para qué quieres aprender la lengua?',o:['Identidad','Familia','Estudios','Cultura']},
+{q:'¿Cómo prefieres aprender?',o:['Videos','Audios','Lectura','Mixto']},
+{q:'¿Cuánto tiempo al día puedes dedicar?',o:['10 min','20 min','30 min','1 hora']}
+];
+let si=0,answers={};
+const qEl=document.getElementById('surveyQ');
+const oEl=document.getElementById('surveyOpts');
+const bar=document.getElementById('bar');
+
+function renderSurvey(){
+ qEl.textContent=survey[si].q;
+ oEl.innerHTML='';
+ bar.style.width=((si+1)/survey.length*100)+'%';
+ survey[si].o.forEach(op=>{
+  const d=document.createElement('div');
+  d.className='card';
+  d.textContent=op;
+  d.onclick=()=>{
+   document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
+   d.classList.add('selected');
+   answers[si]=op;
+  };
+  oEl.appendChild(d);
+ });
+}
+function nextQ(){if(si<survey.length-1){si++;renderSurvey()}else{show('app');load('lecciones')}}
+function prevQ(){if(si>0){si--;renderSurvey()}}
+function skipSurvey(){answers[0]='Quechua';show('app');load('lecciones')}
+renderSurvey();
+
+// --- APP ---
+let lessons=[
+{title:"Saludos",
+  img:"https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80",
+  items:[
+    ['Hola','Rimaykullayki','ri-mai-ku-ʎay-ki','saludo informal'],
+    ['Buenos días','Allin punchaw','aʎ-in pun-chaw','saludo matutino'],
+    ['Buenas tardes','Allin sach’a','aʎ-in sa-ch’a','saludo por la tarde'],
+    ['Buenas noches','Allin tuta','aʎ-in tu-ta','saludo nocturno'],
+    ['Adiós','Tupananchiskama','tu-pa-nan-chi-ska-ma','despedida'],
+    ['¿Cómo estás?','Imaynalla kanki?','i-mai-nal-la kan-ki','preguntar estado'],
+    ['Estoy bien','Allinmi kani','aʎ-in-mi ka-ni','responder que estás bien'],
+    ['Mucho gusto','Ñuqaqa kusikuyki','ñu-qa-ka ku-si-kuy-ki','presentarse'] 
+ ]
+},
+
+{
+  title:"Números",
+  img:"https://s1.static.brasilescola.uol.com.br/be/2023/08/numeros-coloridos-sobre-uma-mesa-branca-com-representacao-do-conjunto-de-numeros-naturais.jpg",
+  items:[
+    ['1','Huk','huk','uno'],
+    ['2','Ishkay','ish-kay','dos'],
+    ['3','Kimsa','kim-sa','tres'],
+    ['4','Tawa','ta-wa','cuatro'],
+    ['5','Pichqa','pich-ka','cinco'],
+    ['6','Soqta','soq-ta','número seis'],
+    ['7','Qanchis','qan-chis','número siete'],
+    ['8','Pusaq','pu-saq','número ocho'],
+    ['9','Isqun','is-qun','número nueve'],
+    ['10','Chunka','chun-ka','número diez']
+  ]
+},
+
+{
+  title:"Familia",
+  img:"https://www.elhogareducador.org/ehe/wp-content/uploads/2019/02/familia-sunset-recortada-scaled.jpg",
+  content:`Madre — Mama — ma-ma — madre
+Padre — Tata — ta-ta — padre
+Hermano — Wawaña — wa-wa-ña — hermano
+Hermana — Wawalla — wa-wa-lla — hermana
+Abuelo — Tayta — tay-ta — abuelo, padre de tu padre o madre
+Abuela — Mama tayta — ma-ma tay-ta — abuela, madre de tu padre o madre
+Hijo — Wawa — wa-wa — hijo, descendiente directo
+Hija — Wawalla — wa-wa-lla — hija`},
+
+{
+  title:"Animales",
+  img:"https://www.anipedia.net/imagenes/fotos-animales.jpg",
+  content:`Perro — Allqu — al-lqu — perro
+Gato — Misi — mi-si — gato
+Vaca — Wakcha — wak-cha — vaca
+Pájaro — Willka — wil-ka — ave
+Pez — Challwa — chall-wa — pez, animal acuático
+Conejo — Wank’a — wan-k’a — conejo, pequeño mamífero`
+},
+
+{
+  title:"Escolares",
+  img:"https://caretas.pe/wp-content/uploads/2024/03/Escolares.jpg",
+  content:`Libro — Waraq’a — wa-raq’a — libro
+Cuaderno — Qillqana — qill-qa-na — cuaderno
+Lápiz — Lapiz — la-piz — lápiz
+Mochila — Sulluq — su-lluq — mochila
+Borrador — Borador — bo-ra-dor — para borrar
+Mesa — Misa — mi-sa — mesa donde estudias
+Silla — Silla — si-lla — silla para sentarse`
+},
+
+{
+  title:"Verbos",
+  img:"https://www.portalneuroensino.com.br/wp-content/uploads/2023/10/Blue-Yellow-Verbs-English-Flashcards-1536x1086.png",
+  content:`Comer — Mikuy — mi-kuy — comer
+Beber — Unay — u-nay — beber
+Dormir — Puñuy — pu-ñuy — dormir
+Caminar — Ruray — ru-ray — acción de andar
+Correr — Ch’askiy — ch’as-kiy — acción de correr rápido
+Hablar — Rimay — ri-may — acción de comunicarse
+Escuchar — Simiwanay — si-mi-wa-nay — prestar atención a sonidos`
+},
+
+{
+  title:"Frases",
+  img:"https://tse2.mm.bing.net/th/id/OIP.XRw4916_KR96pLtwnbjc5wHaE7",
+  content:`¿Dónde está el baño? — Maypinmi wasi?
+Gracias — Añay
+Por favor — Ama hina rimaychu
+¿Dónde está el baño? — Maypinmi wasi? — may-pin-mi wa-si — preguntar ubicación del baño
+Necesito ayuda — Ñoqaqa yanapayta munani — ño-qa-ka ya-na-pay-ta mu-na-ni — pedir ayuda
+¿Cuánto cuesta? — Hayk’ay? — hay-k’ay — preguntar precio
+No entiendo — Mana rimani — ma-na ri-ma-ni — decir que no comprendes
+Gracias — Añay — a-ñay — agradecer`
+},
+
+{
+  title:"Comida",
+  img:"https://victors.es/wp-content/uploads/2023/09/updated_Descubre_los_sabores_de_la_comida_peruana_en_valencia_recetas_deliciosas_para_deleitar_tu_paladar.jpg",
+  content:`Agua — Yaku
+Pan — Tanta
+Maíz — Sara
+Fruta — Simi — si-mi — fruta
+Carne — Siku — si-ku — carne
+Arroz — Aru — a-ru — arroz cocido
+Leche — Queso — qes-o — leche o derivados`
+},
+
+{
+  title:"Tiempo",
+  img:"https://conceptoabc.com/wp-content/uploads/2021/07/Tiempo.jpg",
+  content:`Hoy — Kunanka
+Mañana — Waqay
+Ayer — Qhipa punchaw
+Hace sol — Inti raymi — in-ti ray-mi — día soleado
+Está lloviendo — Yaku puñuy — ya-ku pu-ñuy — hay lluvia
+Hace frío — Chiri kanki — chi-ri kan-ki — clima frío
+Hace calor — Allin inti — a-llin in-ti — clima cálido`
+},
+
+{
+  title:"Direcciones",
+  img:"https://2.bp.blogspot.com/-mNuDl0NXk0w/VQLXouq8-aI/AAAAAAAADvc/6aLtowhuV3s/s1600/direccion-pregunta-ilustracion.jpg",
+  content:`Casa — Wasi
+Escuela — Yachaywasi
+Derecha — Qusqu
+Izquierda — Llaqta
+Mercado — Hatun wasi — ha-tun wa-si — lugar de compras
+Parque — Pampa — pam-pa — lugar abierto
+Hospital — Waqaychay — wa-qay-chay — hospital`
+},
+
+{
+  title:"Preguntas",
+  img:"https://seleneborges.com/wp-content/uploads/2022/01/question-mark-asking-curious-confuse-riddle-puzzle-concept-scaled.jpg",
+  content:`¿Quién eres? — Pi kanki?
+¿Cómo te llamas? — Ima sutiyki?
+¿Por qué? — Mayqin?
+¿Qué es esto? — Imataq kani? — i-ma-taq ka-ni — preguntar qué es algo
+¿Quién eres? — Pi kanki? — pi kan-ki — preguntar identidad
+¿Dónde vives? — Maypin kanki? — may-pin kan-ki — preguntar residencia
+¿Por qué? — Mayqin? — may-qin — preguntar razón`
+},
+
+{
+  title:"Cultura",
+  img:"https://musikhoren.wordpress.com/wp-content/uploads/2016/03/shutterstock_112930792-700x465.jpg",
+  content:`Fiesta — Takiy
+Música tradicional — Huayno — huay-no — estilo musical andino
+Traje típico — Awasqa — a-was-qa — vestimenta tradicional
+Danza — Danza — dan-za — baile de la región
+Leyenda — Anqa — an-qa — historia tradicional contada oralmente`
+}
+];
+
+// PROFESORES
+let profs = [
+{
+  name:'Ana Quispe',
+  bio:'Docente de Quechua con más de 10 años enseñando en comunidades andinas.',
+  gmail:'ana.quispe@gmail.com',
+  phone:'+51 987 654 321',
+  youtube:'8I1wN-rBRhg',
+  img:'https://elbuho.pe/wp-content/uploads/2020/04/profesora-da-clases-gratuitas-de-quechua.png'
+},
+{
+  name:'Luis Mamani',
+  bio:'Profesor de Aymara y promotor de la cultura ancestral.',
+  gmail:'luis.mamani@gmail.com',
+  phone:'+51 912 345 678',
+  youtube:'QDkJEasTs0I',
+  img:'https://i.ytimg.com/vi/eQ245i4a8Po/hqdefault.jpg'
+},
+{
+  name:'Rosa Huamán',
+  bio:'Docente bilingüe, estudió Lingüística Andina.',
+  gmail:'rosa.huaman@gmail.com',
+  phone:'+51 955 123 456',
+  youtube:'2-lkupIoUVg',
+  img:'https://www.rcrperu.com/wp-content/uploads/2022/11/pronabec-1.jpg'
+},
+{
+  name:'María Quispe',
+  bio:'Especialista en enseñanza de lenguas originarias.',
+  gmail:'maria.quispe@gmail.com',
+  phone:'+51 944 222 333',
+  youtube:'JzhWiZRdqmY',
+  img:'https://i.ytimg.com/vi/q4xe6WIY3SY/maxresdefault.jpg'
+},
+{
+  name:'José Ccama',
+  bio:'Profesor de Quechua y tradiciones culturales.',
+  gmail:'jose.ccama@gmail.com',
+  phone:'+51 933 444 555',
+  youtube:'pVpn5d9_zPU',
+  img:'https://i.ytimg.com/vi/6Lbl4VgqZNc/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGGUgQihAMA8=&rs=AOn4CLATe6SGcrcU7YI4lAEvNKRl1gd5sQ'
+},
+{
+  name:'Lucía Flores',
+  bio:'Docente de Aymara y folklore andino.',
+  gmail:'lucia.flores@gmail.com',
+  phone:'+51 966 777 888',
+  youtube:'Xv8_pZeJ_po',
+  img:'https://elmanana.com.mx/u/fotografias/m/2022/6/1/f768x1-94313_94440_5050.jpg'
+},
+{
+  name:'Ricardo Huamán',
+  bio:'Lingüista y especialista en lenguas amazónicas.',
+  gmail:'ricardo.huaman@gmail.com',
+  phone:'+51 988 111 222',
+  youtube:'Nboo3CyAhzI',
+  img:'https://tse3.mm.bing.net/th/id/OIP.EJNVkq3WhfwphazNgIs4ggAAAA?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3'
+},
+{
+  name:'Claudia Quispe',
+  bio:'Docente bilingüe con experiencia en proyectos educativos.',
+  gmail:'claudia.quispe@gmail.com',
+  phone:'+51 977 333 444',
+  youtube:'Gsgr89qn1P8',
+  img:'https://www.diariolosandes.com.ec/wp-content/uploads/2020/03/foto-3-martha-simbana-concejal-de-riobamba.jpg'
+},
+{
+  name:'Hugo Mamani',
+  bio:'Profesor de cultura y lengua Aymara.',
+  gmail:'hugo.mamani@gmail.com',
+  phone:'+51 955 666 777',
+  youtube:'UCiNoG94a7U',
+  img:'https://www.servindi.org/sites/default/files/editor/imagenes/tk1.png'
+},
+{
+  name:'Patricia Huamán',
+  bio:'Especialista en Quechua para niños y adolescentes.',
+  gmail:'patricia.huaman@gmail.com',
+  phone:'+51 944 888 999',
+  youtube:'kgw4mXyEaY4',
+  img:'https://i0.wp.com/www.actualidadambiental.pe/wp-content/uploads/2022/11/foro-por-la-paz-spda1.jpg'
+},
+{
+  name:'Andrés Quispe',
+  bio:'Lingüista y docente de lenguas originarias.',
+  gmail:'andres.quispe@gmail.com',
+  phone:'+51 922 111 333',
+  youtube:'g-o6-TCZ7Ks',
+  img:'https://e-an.americatv.com.pe/actualidad-maestro-quechua-que-rescata-raices-aulas-lima-n491283-696x418-1068850.jpg'
+},
+{
+  name:'Sofía Mamani',
+  bio:'Profesora de Aymara y literatura andina.',
+  gmail:'sofia.mamani@gmail.com',
+  phone:'+51 933 555 666',
+  youtube:'gNtTyUlSBq4',
+  img:'https://th.bing.com/th/id/OIP.MwWVYz5x6ZdF8VadTwC_lQHaEt?w=242&h=180&c=7&r=0&o=7&cb=ucfimg2&pid=1.7&rm=3&ucfimg=1'
+},
+{
+  name:'Diego Huamán',
+  bio:'Docente de Shipibo-Konibo y tradiciones amazónicas.',
+  gmail:'diego.huaman@gmail.com',
+  phone:'+51 911 222 444',
+  youtube:'E1wWyW9on7A',
+  img:'https://www.valoraanalitik.com/wp-content/uploads/2024/05/Polivio-Rosales-1068x623.jpg'
+}
+];
+
+function load(sec){
+
+  // 🔹 ACTIVAR COLOR EN EL MENÚ (PARA TODOS)
+  document.querySelectorAll('.nav')
+    .forEach(n => n.classList.remove('active'));
+
+  document
+    .querySelector(`.nav[onclick="load('${sec}')"]`)
+    .classList.add('active');
+
+  const c = document.getElementById('appContent');
+if(sec === 'lecciones'){
+  let html = '<h2>Lecciones</h2><div class="grid">';
+  lessons.forEach((l,i)=>{
+    html += `
+      <div class="cardY" onclick="openLesson(${i})">
+        <img src="${l.img}">
+        <div>${l.title}</div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  c.innerHTML = html;
+}
+if(sec === 'videos'){
+  let html = '<h2>Videos</h2><div class="grid">';
+  videoTitles.forEach((t,i)=>{
+    html += `
+      <div class="cardY" onclick="openVideo(${i})">
+        <img src="https://img.youtube.com/vi/${videoLinks[i]}/hqdefault.jpg">
+        <div>${t}</div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+if(sec === 'profesores'){
+  let html = '<h2>Profesores</h2><div class="grid">';
+  profs.forEach((p,i)=>{
+    html += `
+      <div class="cardY" onclick="openProfessor(${i})">
+        <img src="${p.img}">
+        <div>${p.name}</div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  c.innerHTML = html;
+}
+if(sec === 'quiz'){
+  let html = `<h2>Quiz</h2>`;
+  quizData.forEach((q,i)=>{
+    html += `
+      <div style="margin-bottom:20px">
+        <h4>${i+1}. ${q.q}</h4>
+        ${q.o.map((op,j)=>`
+          <button class="quiz-btn" onclick="answer(this, ${j === q.a})">
+            ${op}
+          </button>
+        `).join('')}
+      </div>
+    `;
+  });
+  c.innerHTML = html;
+}
+
+if(sec === 'perfil'){
+  const saved = JSON.parse(localStorage.getItem('perfil'));
+
+  // 👉 FORMULARIO DE CREACIÓN
+  if(!saved){
+    c.innerHTML = `
+      <h2>Crear perfil</h2>
+      <div style="display:flex;gap:20px;align-items:flex-start;max-width:700px">
+
+        <div style="flex:1">
+          <label>Nombre de usuario</label>
+          <input id="pUser" placeholder="usuario123">
+
+          <label style="margin-top:10px;display:block">Contraseña</label>
+          <input id="pPass" type="password" placeholder="********">
+
+          <label style="margin-top:10px;display:block">Gmail</label>
+          <input id="pMail" placeholder="correo@gmail.com">
+
+          <label style="margin-top:10px;display:block">Lengua elegida</label>
+          <input id="pLang" value="${answers[0] || 'Quechua'}">
+
+          <label style="margin-top:10px;display:block">Imagen de perfil</label>
+          <input id="pImgFile" type="file" accept="image/*">
+
+          <button class="btn" style="margin-top:16px" onclick="saveProfile()">
+            Guardar perfil
+          </button>
+        </div>
+
+        <div>
+          <img id="previewImg" src="https://via.placeholder.com/160" 
+               style="width:160px;height:160px;object-fit:cover;border-radius:12px">
+        </div>
+
+      </div>
+    `;
+
+    // 🔹 Previsualizar imagen al seleccionarla
+    const fileInput = document.getElementById('pImgFile');
+    const preview = document.getElementById('previewImg');
+    fileInput.addEventListener('change', ()=>{
+      const file = fileInput.files[0];
+      if(file){
+        const reader = new FileReader();
+        reader.onload = e => preview.src = e.target.result;
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  // 👉 PERFIL YA GUARDADO
+  else{
+    c.innerHTML = `
+      <h2>Mi perfil</h2>
+
+      <div style="
+        display:flex;
+        gap:20px;
+        align-items:center;
+        max-width:700px;
+        background:#f0f0f0;
+        padding:16px;
+        border-radius:16px;
+        color:#000
+      ">
+
+        <div style="flex:1">
+          <p><b>Usuario:</b> ${saved.user}</p>
+          <p><b>Gmail:</b> ${saved.mail}</p>
+          <p><b>Lengua:</b> ${saved.lang}</p>
+        </div>
+
+        <div>
+          <img src="${saved.img}"
+               style="width:160px;height:160px;object-fit:cover;border-radius:12px">
+        </div>
+
+      </div>
+    `;
+  }
+}
+  const lang = answers[0] || 'Quechua';
+}
+
+function openViewer(html){
+ const v=document.createElement('div');
+ v.className='viewer';
+ v.innerHTML=`<div class="viewerBox">
+ <button class="closeX" onclick="this.closest('.viewer').remove()">X</button>
+ ${html}
+ </div>`;
+ document.body.appendChild(v);
+}
+// ====== VIDEOS ======
+let videoTitles = [
+  "Proverbios ancestrales en Quechua",
+  "Frases que te pueden salvar la vida",
+  "Saludos básicos para empezar",
+  "Cómo presentarte correctamente",
+  "Frases del día a día",
+  "Errores comunes al hablar",
+  "Palabras con historia y memoria",
+  "La lengua viva en la comunidad",
+  "Cómo hacer preguntas básicas",
+  "Frases útiles para viajar",
+  "Lengua, identidad y cultura",
+  "Pronunciación clara desde cero",
+  "Conversaciones simples para practicar"
+];
+
+let videoLinks = [
+  "8I1wN-rBRhg",
+  "QDkJEasTs0I",
+  "2-lkupIoUVg",
+  "JzhWiZRdqmY",
+  "pVpn5d9_zPU",
+  "Xv8_pZeJ_po",
+  "Nboo3CyAhzI",
+  "Gsgr89qn1P8",
+  "UCiNoG94a7U",
+  "kgw4mXyEaY4",
+  "g-o6-TCZ7Ks",
+  "gNtTyUlSBq4",
+  "E1wWyW9on7A"
+];
+
+function openVideo(i){
+  const videoId = videoLinks[i];
+  const videoTitle = videoTitles[i];
+  
+  // Obtener comentarios guardados para este video
+  const commentsKey = `comments_${videoId}`;
+  let savedComments = JSON.parse(localStorage.getItem(commentsKey)) || [];
+
+  openViewer(`
+    <h3>${videoTitle}</h3>
+    <iframe
+      width="100%"
+      height="360"
+      src="https://www.youtube.com/embed/${videoId}"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+
+    <h4>Comentarios</h4>
+    <div id="commentBox" style="
+      max-height:200px;
+      overflow:auto;
+      background:#f0f0f0;
+      padding:8px;
+      border-radius:8px;
+      margin-bottom:10px;
+      color:#000;
+    ">
+      ${savedComments.map(c=>`<p><b>${c.user}:</b> ${c.text}</p>`).join('')}
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <input id="commentInput" placeholder="Escribe un comentario..." style="flex:1;padding:8px">
+      <button class="btn" onclick="submitComment('${commentsKey}')">Comentar</button>
+    </div>
+  `);
+}
+
+function submitComment(key){
+  const profile = JSON.parse(localStorage.getItem('perfil'));
+  if(!profile){
+    alert("Inicia sesión para comentar."); // o aquí puedes abrir un modal bonito
+    return;
+  }
+
+  const input = document.getElementById('commentInput');
+  const text = input.value.trim();
+  if(!text) return;
+
+  // Guardar comentario
+  let comments = JSON.parse(localStorage.getItem(key)) || [];
+  comments.push({user: profile.user, text});
+  localStorage.setItem(key, JSON.stringify(comments));
+
+  // Actualizar visualización
+  const box = document.getElementById('commentBox');
+  box.innerHTML += `<p><b>${profile.user}:</b> ${text}</p>`;
+  input.value = '';
+  box.scrollTop = box.scrollHeight; // desplaza al último comentario
+}
+
+function answer(btn,ok){btn.classList.add(ok?'correct':'wrong')}
+function addComment(btn){
+ const box=btn.nextElementSibling;
+ const txt=btn.previousElementSibling.value;
+ if(txt){const p=document.createElement('p');p.textContent=txt;box.appendChild(p);btn.previousElementSibling.value='';}
+}
+function saveProfile(){
+  const perfil = {
+    user: document.getElementById('pUser').value,
+    pass: document.getElementById('pPass').value,
+    mail: document.getElementById('pMail').value,
+    lang: document.getElementById('pLang').value,
+    img: document.getElementById('pImg').value || 'https://via.placeholder.com/200'
+  };
+
+  if(!perfil.user || !perfil.pass || !perfil.mail){
+    alert('Completa todos los campos');
+    return;
+  }
+
+  localStorage.setItem('perfil', JSON.stringify(perfil));
+  load('perfil');
+}
+
+function openLesson(i){
+  const l = lessons[i];
+  let fullText = '';
+let html = `<h3>${l.title}</h3>
+<button class="btn" onclick="speakText(fullText)">🔊 Escuchar</button>`;
+
+  if(l.items){
+    html += '<table style="width:100%;border-collapse:collapse">';
+    html += '<tr><th>Español</th><th>Lengua</th><th>Pronunciación</th><th>Uso</th></tr>';
+    l.items.forEach(it=>{
+      html += `
+        <tr>
+          <td>${it[0]}</td>
+          <td>${it[1]}</td>
+          <td>${it[2]}</td>
+          <td>${it[3]}</td>
+        </tr>
+      `;
+    });
+    html += '</table>';
+  } else {
+    html += '<ul>';
+    l.content.split('\n').forEach(line=>{
+      html += `<li>${line}</li>`;
+    });
+    html += '</ul>';
+  }
+
+  openViewer(html);
+}
+function speakText(text){
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-ES';
+  u.rate = 0.9;
+  window.speechSynthesis.speak(u);
+}
+function openProfessor(i){
+  const p = profs[i];
+
+  openViewer(`
+    <h3>${p.name}</h3>
+
+    <p>${p.bio}</p>
+
+    <p><b>Gmail:</b> ${p.gmail}</p>
+    <p><b>Teléfono:</b> ${p.phone}</p>
+
+    <iframe
+      width="100%"
+      height="315"
+      src="https://www.youtube.com/embed/${p.youtube}"
+      frameborder="0"
+      allowfullscreen>
+    </iframe>
+  `);
+}
+// ===== QUIZ =====
+const quizData = [
+  {
+    q: "¿Cómo se dice Hola en Quechua?",
+    o: ["Allin punchaw", "Rimaykullayki", "Añay"],
+    a: 1
+  },
+  {
+    q: "¿Qué significa 'Añay'?",
+    o: ["Hola", "Gracias", "Adiós"],
+    a: 1
+  },
+  {
+    q: "¿Cómo se dice Casa?",
+    o: ["Wasi", "Yaku", "Sara"],
+    a: 0
+  },
+  {
+    q: "¿Qué es 'Yaku'?",
+    o: ["Sol", "Agua", "Fuego"],
+    a: 1
+  },
+  {
+    q: "¿Cómo se dice Perro?",
+    o: ["Misi", "Allqu", "Wakcha"],
+    a: 1
+  },
+  {
+    q: "¿Qué significa 'Wawa'?",
+    o: ["Niño", "Madre", "Padre"],
+    a: 0
+  },
+  {
+    q: "¿Cómo se dice Gracias?",
+    o: ["Añay", "Tupananchiskama", "Imaynalla"],
+    a: 0
+  },
+  {
+    q: "¿Qué es 'Sara'?",
+    o: ["Papa", "Maíz", "Pan"],
+    a: 1
+  },
+  {
+    q: "¿Cómo se dice Escuela?",
+    o: ["Yachaywasi", "Wasi", "Hatun wasi"],
+    a: 0
+  },
+  {
+    q: "¿Qué significa 'Punchaw'?",
+    o: ["Noche", "Día", "Tarde"],
+    a: 1
+  },
+  {
+    q: "¿Cómo se dice Adiós?",
+    o: ["Añay", "Rimaykullayki", "Tupananchiskama"],
+    a: 2
+  },
+  {
+    q: "¿Qué es 'Inti'?",
+    o: ["Sol", "Luna", "Estrella"],
+    a: 0
+  },
+  {
+    q: "¿Qué lengua es originaria del Perú?",
+    o: ["Latín", "Quechua", "Inglés"],
+    a: 1
+  }
+];
+
+function saveProfile(){
+  const fileInput = document.getElementById('pImgFile');
+  const preview = document.getElementById('previewImg');
+
+  const perfil = {
+    user: document.getElementById('pUser').value,
+    pass: document.getElementById('pPass').value,
+    mail: document.getElementById('pMail').value,
+    lang: document.getElementById('pLang').value,
+    img: preview.src // 🔹 guardamos la imagen local como DataURL
+  };
+
+  if(!perfil.user || !perfil.pass || !perfil.mail){
+    alert('Completa todos los campos');
+    return;
+  }
+
+  localStorage.setItem('perfil', JSON.stringify(perfil));
+  load('perfil');
+}
+
+function getProfile(){
+  const p = localStorage.getItem('takiProfile');
+  return p ? JSON.parse(p) : null;
+}
+
+</script>
+</body>
+</html>
